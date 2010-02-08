@@ -47,6 +47,7 @@ AC_CHECK_FUNCS([memset munmap])
 
 AC_CONFIG_FILES([Makefile
                  libs/mbox/Makefile
+                 libs/thread_queue/Makefile
                  src/Makefile])
 
 AC_OUTPUT

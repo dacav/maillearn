@@ -19,7 +19,7 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = libs/mbox src
+SUBDIRS = libs/thread_queue libs/mbox src
 #.PHONY : doc
 #
 #doc:
