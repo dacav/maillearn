@@ -20,13 +20,10 @@
 
 #include <mbox.h>
 
-static const char *errors[] = {
-    "Success",
-    "Opening file"
-};
+#include "datatypes.h"
 
-const char * mbox_strerr(mbox_err_t err)
+void mbox_parse (mbox_t *mbox)
 {
-    return errors[err];
+    
 }
 

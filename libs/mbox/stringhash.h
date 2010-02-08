@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 Giovanni Simoni
+ * Copyright 2009 2010 Giovanni Simoni
  *
  * This file is part of maillearn.
  *
@@ -18,15 +18,10 @@
  *
  */
 
-#include <mbox.h>
+#ifndef __defined_stringhash_h
+#define __defined_stringhash_h
 
-static const char *errors[] = {
-    "Success",
-    "Opening file"
-};
+unsigned long string_hash (const unsigned char *name);
 
-const char * mbox_strerr(mbox_err_t err)
-{
-    return errors[err];
-}
+#endif // __defined_stringhash_h
 

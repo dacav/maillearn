@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 Giovanni Simoni
+ * Copyright 2009 2010 Giovanni Simoni
  *
  * This file is part of maillearn.
  *
@@ -18,15 +18,35 @@
  *
  */
 
-#include <mbox.h>
+#include "datatypes.h"
+#include "stringhash.h"
 
-static const char *errors[] = {
-    "Success",
-    "Opening file"
-};
+#include <dacav.h>
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
 
-const char * mbox_strerr(mbox_err_t err)
+#define FIELDS_NBUCKETS 5
+
+mail_t * mail_new ()
 {
-    return errors[err];
+    mail_t *ret;
+
+    assert(ret = malloc(sizeof(mail_t)));
+    memset(ret, 0, sizeof(mail_t));
+
+    //ret->fields = dhash_new(FIELDS_NBUCKETS, string_hash, strcmp);
+
+    return ret;
+}
+
+void mail_free (mail_t *mail)
+{
+    //dhash_free(ret->fields, free, free);
+
+    /* Note: this works even if the fields are NULL */
+    free((void *)(mail->from));
+    free((void *)(mail->to));
+    free((void *)(mail->subject));
 }
 

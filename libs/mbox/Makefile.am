@@ -17,7 +17,7 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 # 
 
-AM_CFLAGS = -std=gnu99 -Wall -Werror -I./mbox/ -I../thread_queue/
+AM_CFLAGS = -std=gnu99 -Wall -Werror -I./mbox/ -I$(top_srcdir)/libs/thread_queue/
 
 lib_LIBRARIES = libmbox.a
 include_HEADERS = mbox.h
@@ -28,4 +28,6 @@ includembox_HEADERS = mbox/descriptor.h \
 
 libmbox_a_SOURCES = $(include_HEADERS) \
                     $(includembox_HEADERS) \
-                    descriptor.c datatypes.h error.c
+                    descriptor.c datatypes.h error.c mail.c parse.c \
+                    stringhash.c stringhash.h
+

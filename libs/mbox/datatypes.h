@@ -21,11 +21,20 @@
 #ifndef __defined_datatypes_h
 #define __defined_datatypes_h
 
-#include <mbox.h>
 #include <stdio.h>
+#include <dacav.h>
+
+typedef struct {
+    const char *from;
+    const char *to;
+    const char *subject;
+} mail_t;
 
 struct mbox {
     FILE *file;
+
+    dlist_t *mail; /* A list of mails, each element of the list is a
+                      mail_t object */
 };
 
 #endif // __defined_datatypes_h
