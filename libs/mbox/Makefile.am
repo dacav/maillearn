@@ -17,17 +17,16 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 # 
 
-AM_CFLAGS = -std=gnu99 -Wall -Werror -I./mbox/ -I$(top_srcdir)/libs/thread_queue/
+AM_CFLAGS = -pthread -std=gnu99 -Wall -Werror -I./mbox/ -I$(top_srcdir)/libs/thread_queue/
 
 lib_LIBRARIES = libmbox.a
 include_HEADERS = mbox.h
 
 includemboxdir = $(prefix)/include/mbox
-includembox_HEADERS = mbox/descriptor.h \
-                      mbox/error.h
+includembox_HEADERS = mbox/descriptor.h mbox/error.h mbox/parse.h
 
 libmbox_a_SOURCES = $(include_HEADERS) \
                     $(includembox_HEADERS) \
-                    descriptor.c datatypes.h error.c mail.c parse.c \
-                    stringhash.c stringhash.h
+                    datatypes.h descriptor.c error.c mail.c mail.h \
+                    mbox.h parse.c parse.h string.c string.h
 

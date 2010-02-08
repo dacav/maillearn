@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 2010 Giovanni Simoni
+ * Copyright 2010 Giovanni Simoni
  *
  * This file is part of maillearn.
  *
@@ -22,19 +22,28 @@
 #define __defined_datatypes_h
 
 #include <stdio.h>
-#include <dacav.h>
+#include <sys/types.h>
+#include <regex.h>
 
+#include <dacav.h>
+#include <thrdqueue.h>
+
+/* Managed by the private mail.c module. */
 typedef struct {
     const char *from;
     const char *to;
     const char *subject;
 } mail_t;
 
-struct mbox {
-    FILE *file;
+/* Managed by the parse.c module. */
+typedef struct {
+    regex_t mailstart;      /* Starting of mail */
+} parse_t;
 
-    dlist_t *mail; /* A list of mails, each element of the list is a
-                      mail_t object */
+struct mbox {
+    FILE *file;                 /* mbox file to be read */
+    parse_t parse;              /* Parsing data */
+    thrdqueue_t *mail_queue;    /* Queue of outgoing mails */
 };
 
 #endif // __defined_datatypes_h

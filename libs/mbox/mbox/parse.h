@@ -18,42 +18,9 @@
  *
  */
 
-#include <mbox.h>
+#ifndef __defined_mbox_parse_h
+#define __defined_mbox_parse_h
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
+void mbox_parse (mbox_t *mbox);
 
-#include <thrdqueue.h>
-
-#include "datatypes.h"
-#include "parse.h"
-
-mbox_err_t mbox_new (const char *filename, mbox_t **mbox)
-{
-    register mbox_t *ret;
-    assert(ret = malloc(sizeof(mbox_t)));
-
-    if ((ret->file = fopen(filename, "rt")) == NULL) {
-        return MBOX_OPENING;
-    }
-	ret->mail_queue = thq_new();
-    parse_init(&ret->parse);
-
-    *mbox = ret;
-    return MBOX_SUCCESS;
-}
-
-void mbox_free (mbox_t *mbox)
-{
-	register thrdqueue_t *q = mbox->mail_queue;
-
-    fclose(mbox->file);
-	thq_abort(q);
-	thq_delete(q);
-
-    parse_free(&ret->parse);
-
-    free(mbox);
-}
-
+#endif // __defined_mbox_parse_h

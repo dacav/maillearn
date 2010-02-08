@@ -1,27 +1,29 @@
 /*
- * Copyright 2009 2010 Giovanni Simoni
+ * Copyright 2010 Giovanni Simoni
  *
- * This file is part of maillearn.
+ * This file is part of parselearn.
  *
- * maillearn is free software: you can redistribute it and/or modify
+ * parselearn is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * maillearn is distributed in the hope that it will be useful,
+ * parselearn is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with maillearn.  If not, see <http://www.gnu.org/licenses/>.
+ * along with parselearn.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
-#ifndef __defined_stringhash_h
-#define __defined_stringhash_h
+#ifndef __defined_parse_h
+#define __defined_parse_h
 
-unsigned long string_hash (const unsigned char *name);
+#include <mbox.h>
 
-#endif // __defined_stringhash_h
+void parse_init (parse_t *p);
+void parse_free (parse_t *p);
 
+#endif // __defined_parse_h

@@ -23,4 +23,7 @@
 
 typedef struct mbox mbox_t;
 
+void mbox_free (mbox_t *mbox);
+mbox_err_t mbox_new (const char *filename, mbox_t **mbox);
+
 #endif // __defined_mbox_descriptor_h

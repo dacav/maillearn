@@ -18,42 +18,33 @@
  *
  */
 
-#include <mbox.h>
+#include "strings.h"
 
-#include <assert.h>
-#include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 
-#include <thrdqueue.h>
-
-#include "datatypes.h"
-#include "parse.h"
-
-mbox_err_t mbox_new (const char *filename, mbox_t **mbox)
+unsigned long string_hash (const unsigned char *name)
 {
-    register mbox_t *ret;
-    assert(ret = malloc(sizeof(mbox_t)));
-
-    if ((ret->file = fopen(filename, "rt")) == NULL) {
-        return MBOX_OPENING;
+    unsigned long h = 0, g;
+    while (*name) {
+        h = (h << 4) + *name++;
+        if ((g = h & 0xf0000000) != 0) {
+            h ^= g >> 24;
+        }
+        h &= ~g;
     }
-	ret->mail_queue = thq_new();
-    parse_init(&ret->parse);
-
-    *mbox = ret;
-    return MBOX_SUCCESS;
+    return h;
 }
 
-void mbox_free (mbox_t *mbox)
+char *string_alloc (char *orig, size_t len)
 {
-	register thrdqueue_t *q = mbox->mail_queue;
+    register char *ret;
 
-    fclose(mbox->file);
-	thq_abort(q);
-	thq_delete(q);
-
-    parse_free(&ret->parse);
-
-    free(mbox);
+    if (len == 0) {
+        len = strlen(orig);
+    }
+    assert(ret = malloc(len * sizeof(char)));
+    strncpy(ret, orig, len);
+    return ret;
 }
 

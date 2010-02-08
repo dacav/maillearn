@@ -18,42 +18,14 @@
  *
  */
 
-#include <mbox.h>
+#ifndef __defined_stringhash_h
+#define __defined_stringhash_h
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
+/* A hashing function for string, suitable for libdacav hashtables. */
+unsigned long string_hash (const unsigned char *name);
 
-#include <thrdqueue.h>
+/* Automatic allocation of a new string. For freeing just use free. */
+char *string_alloc (char *orig, size_t len);
 
-#include "datatypes.h"
-#include "parse.h"
-
-mbox_err_t mbox_new (const char *filename, mbox_t **mbox)
-{
-    register mbox_t *ret;
-    assert(ret = malloc(sizeof(mbox_t)));
-
-    if ((ret->file = fopen(filename, "rt")) == NULL) {
-        return MBOX_OPENING;
-    }
-	ret->mail_queue = thq_new();
-    parse_init(&ret->parse);
-
-    *mbox = ret;
-    return MBOX_SUCCESS;
-}
-
-void mbox_free (mbox_t *mbox)
-{
-	register thrdqueue_t *q = mbox->mail_queue;
-
-    fclose(mbox->file);
-	thq_abort(q);
-	thq_delete(q);
-
-    parse_free(&ret->parse);
-
-    free(mbox);
-}
+#endif // __defined_stringhash_h
 

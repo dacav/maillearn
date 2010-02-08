@@ -21,10 +21,24 @@
 #include <mbox.h>
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <dacav.h>
 
 int main (int argc, char **argv)
 {
+    mbox_err_t err;
+    mbox_t *mbox;
 
+    assert(argv > 1);
+    err = mbox_new(argv[1], &mbox);
+    if (err) {
+        fprintf(stderr, "Mbox error: %s\n", mbox_strerr(err));
+        exit(1);
+    }
+
+    mbox_parse(mbox);
+
+    mbox_free(mbox);
+    exit(0);
 }
