@@ -1,0 +1,11 @@
+#!/bin/sh
+
+rm -f config.cache
+mkdir -p m4
+#libtoolize && 
+aclocal &&
+autoconf &&
+autoheader &&
+automake -a &&
+
+exit
