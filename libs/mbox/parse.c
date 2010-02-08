@@ -25,14 +25,17 @@
 #include "parse.h"
 
 #include <regex.h>
+#include <assert.h>
 
 #define PARSE_BUFLEN    32
-#define PARSE_FMT       "%32s"
+#define PARSE_FMT       "%32[^\n]\n"
+
+#include <stdio.h>
 
 static inline
 int match_mailstart (parse_t *p, const char *str)
 {
-    return regexec(&p->mailstart, str, 0, NULL, 0) == 0
+    return regexec(&p->mailstart, str, 0, NULL, 0) == 0;
 }
 
 void mbox_parse (mbox_t *mbox)
@@ -41,17 +44,19 @@ void mbox_parse (mbox_t *mbox)
     parse_t *p = &mbox->parse;
     int val;
 
+    // TODO implement business logic
     while ((val = fscanf(mbox->file, PARSE_FMT, buffer) != EOF)
             && val > 0) {
         if (match_mailstart(p, buffer)) {
             printf("FOUND? '%s'\n", buffer);
         }
     }
+    printf("END\n");
 }
 
 void parse_init (parse_t *p)
 {
-    assert(!regcomp(&p->mailstart, "^From: .*$", REG_NOSUB));
+    assert(!regcomp(&p->mailstart, "From .*", REG_NOSUB));
 }
 
 void parse_free (parse_t *p)

@@ -22,6 +22,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 unsigned long string_hash (const unsigned char *name)
 {

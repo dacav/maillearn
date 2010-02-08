@@ -28,5 +28,5 @@ includembox_HEADERS = mbox/descriptor.h mbox/error.h mbox/parse.h
 libmbox_a_SOURCES = $(include_HEADERS) \
                     $(includembox_HEADERS) \
                     datatypes.h descriptor.c error.c mail.c mail.h \
-                    mbox.h parse.c parse.h string.c string.h
+                    mbox.h parse.c parse.h strings.c strings.h
 

@@ -21,6 +21,8 @@
 #ifndef __defined_stringhash_h
 #define __defined_stringhash_h
 
+#include <stdlib.h>
+
 /* A hashing function for string, suitable for libdacav hashtables. */
 unsigned long string_hash (const unsigned char *name);
 

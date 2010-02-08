@@ -19,7 +19,7 @@
  */
 
 #include "datatypes.h"
-#include "stringhash.h"
+#include "strings.h"
 
 #include <dacav.h>
 #include <assert.h>

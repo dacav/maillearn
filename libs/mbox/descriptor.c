@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 2010 Giovanni Simoni
+ * Copyright 2010 Giovanni Simoni
  *
  * This file is part of maillearn.
  *
@@ -52,7 +52,7 @@ void mbox_free (mbox_t *mbox)
 	thq_abort(q);
 	thq_delete(q);
 
-    parse_free(&ret->parse);
+    parse_free(&mbox->parse);
 
     free(mbox);
 }

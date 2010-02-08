@@ -27,7 +27,7 @@
 typedef struct thrdqueue thrdqueue_t;
 
 /* Initializes a new queue of len elements */
-thrdqueue_t * thq_new (size_t len);
+thrdqueue_t * thq_new ();
 
 /* Extracts the first element (or locks on the queue if no element is
  * available) 
