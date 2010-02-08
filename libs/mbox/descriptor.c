@@ -21,6 +21,8 @@
 #include <mbox.h>
 
 #include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "datatypes.h"
 
@@ -40,6 +42,6 @@ mbox_err_t mbox_new (const char *filename, mbox_t **mbox)
 void mbox_free (mbox_t *mbox)
 {
     fclose(mbox->file);
-    free(ret);
+    free(mbox);
 }
 

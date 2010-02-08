@@ -26,27 +26,5 @@
 
 int main (int argc, char **argv)
 {
-    mbox_t *mbox;
-    mbox_err_t error;
-    diter_t *it;
 
-    assert(argc >= 2);
-    error = mbox_map_file(argv[1], &mbox);
-    if (error != MBOX_SUCCESS) {
-        fprintf(stderr, mbox_strerror(error));
-        exit(1);
-    }
-    mbox_bookmark(mbox);
-
-    it = dlist_iter_new(&mbox->bookmarks);
-    while (diter_hasnext(it)) {
-        mbox_mail_t *mail = (mbox_mail_t *)diter_next(it);
-        printf("start=%d len=%d\n", (int)(mail->start), mail->length);
-    }
-    dlist_iter_free(it);
-
-    mbox_release_file(mbox);
-
-    exit(0);
 }
-

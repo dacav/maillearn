@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /*
  * Copyright 2009 2010 Giovanni Simoni
  *
@@ -23,7 +22,7 @@
 
 static const char *errors[] = {
     "Success",
-    "Opening file",
+    "Opening file"
 };
 
 const char * mbox_strerr(mbox_err_t err)
