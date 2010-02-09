@@ -21,9 +21,8 @@
 #ifndef __defined_mbox_descriptor_h
 #define __defined_mbox_descriptor_h
 
-typedef struct mbox mbox_t;
-
 void mbox_free (mbox_t *mbox);
 mbox_err_t mbox_new (const char *filename, mbox_t **mbox);
+mail_t *mbox_next_mail (mbox_t *mbox);
 
 #endif // __defined_mbox_descriptor_h

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 2010 Giovanni Simoni
+ * Copyright 2010 Giovanni Simoni
  *
  * This file is part of maillearn.
  *
@@ -18,5 +18,10 @@
  *
  */
 
+#include <mbox/types.h>
+
+
+
 #include <mbox/error.h>
 #include <mbox/descriptor.h>
+#include <mbox/mail.h>

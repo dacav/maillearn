@@ -29,12 +29,19 @@ int main (int argc, char **argv)
 {
     mbox_err_t err;
     mbox_t *mbox;
+    mail_t *mail;
 
     assert(argc > 1);
     err = mbox_new(argv[1], &mbox);
     if (err) {
         fprintf(stderr, "Mbox error: %s\n", mbox_strerr(err));
         exit(1);
+    }
+
+    printf("Starting to read\n");
+    while ((mail = mbox_next_mail (mbox)) != NULL) {
+        printf("Got mail! %p\n", (void *)mail);
+//        mail_free(mail);
     }
 
     mbox_free(mbox);

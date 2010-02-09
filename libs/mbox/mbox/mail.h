@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 Giovanni Simoni
+ * Copyright 2009 2010 Giovanni Simoni
  *
  * This file is part of maillearn.
  *
@@ -18,15 +18,9 @@
  *
  */
 
-#ifndef __defined_mail_h
-#define __defined_mail_h
+#ifndef __defined_mbox_mail_h
+#define __defined_mbox_mail_h
 
-mail_t * mail_new ();
+void mail_free (mail_t *mail);
 
-void mail_set_from (mail_t *mail, const char *from);
-void mail_set_to (mail_t *mail, const char *to);
-void mail_set_subject (mail_t *mail, const char *subject);
-void mail_append (mail_t *mail, const char *row);
-
-
-#endif // __defined_mail_h
+#endif // __defined_mbox_mail_h

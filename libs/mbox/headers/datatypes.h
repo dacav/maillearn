@@ -31,12 +31,18 @@
 
 /* Managed by the private mail.c module. */
 typedef struct {
+    dlist_t *pieces;
+    size_t length;
+} field_t;
+
+/* Typedef'd on mail_t */
+struct mail {
     dlist_t * from;
     dlist_t * to;
     dlist_t * subject;
 
     dlist_t * rows;
-} mail_t;
+};
 
 /* Managed by the parse.c module. */
 typedef struct {
@@ -46,6 +52,7 @@ typedef struct {
     regex_t fld_subject;    /* Subject field */
 } parse_t;
 
+/* Typedef'd on mbox_t */
 struct mbox {
     FILE *file;                 /* mbox file to be read */
     parse_t parse;              /* Parsing data */

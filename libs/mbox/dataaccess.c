@@ -18,15 +18,23 @@
  *
  */
 
-#ifndef __defined_mail_h
-#define __defined_mail_h
+#include <mbox.h>
 
-mail_t * mail_new ();
+#include "headers/datatypes.h"
+#include <thrdqueue.h>
 
-void mail_set_from (mail_t *mail, const char *from);
-void mail_set_to (mail_t *mail, const char *to);
-void mail_set_subject (mail_t *mail, const char *subject);
-void mail_append (mail_t *mail, const char *row);
+mail_t *mbox_next_mail (mbox_t *mbox)
+{
+    mail_t *ret;
 
+    switch (thq_extract(mbox->mail_queue, (void **)&ret)) {
+        case THQ_ENDDATA:
+        case THQ_ABORTED:
+            return NULL;
+        case THQ_SUCCESS:
+            return ret;
+        default:
+            return NULL;
+    }
+}
 
-#endif // __defined_mail_h

@@ -18,6 +18,8 @@
  *
  */
 
+#include <mbox.h>
+
 #include "headers/datatypes.h"
 #include "headers/strings.h"
 
