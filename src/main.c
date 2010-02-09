@@ -37,7 +37,6 @@ int main (int argc, char **argv)
         exit(1);
     }
 
-    mbox_parse(mbox);
     mbox_free(mbox);
 
     exit(0);

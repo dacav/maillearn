@@ -18,8 +18,8 @@
  *
  */
 
-#include "datatypes.h"
-#include "strings.h"
+#include "headers/datatypes.h"
+#include "headers/strings.h"
 
 #include <dacav.h>
 #include <assert.h>

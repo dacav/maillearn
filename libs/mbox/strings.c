@@ -18,7 +18,7 @@
  *
  */
 
-#include "strings.h"
+#include "headers/strings.h"
 
 #include <string.h>
 #include <stdlib.h>

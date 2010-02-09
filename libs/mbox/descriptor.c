@@ -23,12 +23,19 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 #include <thrdqueue.h>
 
-#include "datatypes.h"
-#include "parse.h"
-#include "mail.h"
+#include "headers/datatypes.h"
+#include "headers/parse.h"
+#include "headers/mail.h"
+
+static
+void * parsing_thread (void *arg)
+{
+    return (void *)parse_start((mbox_t *)arg);
+}
 
 mbox_err_t mbox_new (const char *filename, mbox_t **mbox)
 {
@@ -40,8 +47,11 @@ mbox_err_t mbox_new (const char *filename, mbox_t **mbox)
     }
 	ret->mail_queue = thq_new();
     parse_init(&ret->parse);
-
     *mbox = ret;
+
+    assert(pthread_create(&ret->parser, NULL, parsing_thread,
+           (void *)ret) == 0);
+
     return MBOX_SUCCESS;
 }
 
@@ -51,8 +61,8 @@ void mbox_free (mbox_t *mbox)
 
     fclose(mbox->file);
 	thq_abort(q);
+    pthread_join(mbox->parser, NULL);
 	thq_delete(q, (void (*)(void *))mail_free);
-
     parse_free(&mbox->parse);
 
     free(mbox);

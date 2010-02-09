@@ -17,7 +17,8 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 # 
 
-AM_CFLAGS = -std=gnu99 -Wall -Werror -I$(top_srcdir)/libs/mbox/ \
+AM_CFLAGS = -std=gnu99 -Wall -Werror -pthread \
+            -I$(top_srcdir)/libs/mbox/ \
             -I$(top_srcdir)/libs/thread_queue/
 
 AM_LDFLAGS = -L$(top_srcdir)/libs/mbox/ -L$(top_srcdir)/libs/thread_queue/

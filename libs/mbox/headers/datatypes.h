@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <regex.h>
+#include <pthread.h>
 
 #include <dacav.h>
 #include <thrdqueue.h>
@@ -49,6 +50,7 @@ struct mbox {
     FILE *file;                 /* mbox file to be read */
     parse_t parse;              /* Parsing data */
     thrdqueue_t *mail_queue;    /* Queue of outgoing mails */
+    pthread_t parser;           /* Parsing thread */
 };
 
 #endif // __defined_datatypes_h

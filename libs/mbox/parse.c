@@ -20,15 +20,16 @@
 
 #include <mbox.h>
 
-#include "datatypes.h"
-#include "strings.h"
-#include "parse.h"
-#include "mail.h"
+#include "headers/datatypes.h"
+#include "headers/strings.h"
+#include "headers/parse.h"
+#include "headers/mail.h"
 
 #include <regex.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <thrdqueue.h>
 
 /* Enqueues a mail object. If the operationg gets aborted by any other
  * thread, every element gets extracted and freed.
@@ -69,7 +70,7 @@ int match_subject (parse_t *p, const char *str, regmatch_t *positions)
     return regexec(&p->fld_subject, str, 2, positions, 0) != REG_NOMATCH;
 }
 
-int mbox_parse (mbox_t *mbox)
+int parse_start (mbox_t *mbox)
 {
     char *line;
     size_t n;
@@ -127,7 +128,12 @@ int mbox_parse (mbox_t *mbox)
         }
     }
     if (line) free(line);
-    return feof(mbox->file) ? 0 : 1;
+    if (feof(mbox->file)) {
+        thq_enddata(mbox->mail_queue);
+        return 0;
+    } else {
+        return 1;
+    }
 }
 
 void parse_init (parse_t *p)

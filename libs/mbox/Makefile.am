@@ -24,10 +24,12 @@ lib_LIBRARIES = libmbox.a
 include_HEADERS = mbox.h
 
 includemboxdir = $(prefix)/include/mbox
-includembox_HEADERS = mbox/descriptor.h mbox/error.h mbox/parse.h
+includembox_HEADERS = mbox/descriptor.h mbox/error.h
 
 libmbox_a_SOURCES = $(include_HEADERS) \
                     $(includembox_HEADERS) \
-                    datatypes.h descriptor.c error.c mail.c mail.h \
-                    mbox.h parse.c parse.h strings.c strings.h
+                    datatypes.h descriptor.c error.c mail.c parse.c \
+                    strings.c \
+					headers/mail.h headers/mbox.h headers/parse.h \
+                    headers/strings.h
 

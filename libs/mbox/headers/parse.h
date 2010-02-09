@@ -25,5 +25,6 @@
 
 void parse_init (parse_t *p);
 void parse_free (parse_t *p);
+int  parse_start (mbox_t *mbox);
 
 #endif // __defined_parse_h

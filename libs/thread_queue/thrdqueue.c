@@ -95,12 +95,17 @@ thq_status_t thq_extract (thrdqueue_t *thq, void **el)
 	return THQ_SUCCESS;
 }
 
-void thq_abort (thrdqueue_t *thq)
+static inline
+void set_status (thrdqueue_t *thq, unsigned char status)
 {
     pthread_mutex_lock(&thq->cmux);
-	thq->status = STATUS_ABORTED;
+	thq->status = status;
     pthread_mutex_unlock(&thq->cmux);
+}
 
+void thq_abort (thrdqueue_t *thq)
+{
+    set_status(thq, STATUS_ABORTED);
     pthread_cond_broadcast(&thq->empty);
 }
 
@@ -110,5 +115,10 @@ void thq_delete (thrdqueue_t *thq, void (*memfree)(void *))
     pthread_mutex_destroy(&thq->cmux);
     pthread_cond_destroy(&thq->empty);
     free(thq);
+}
+
+void thq_enddata (thrdqueue_t *thq)
+{
+    set_status(thq, STATUS_ENDDATA);
 }
 
