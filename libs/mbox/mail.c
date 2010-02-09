@@ -33,20 +33,48 @@ mail_t * mail_new ()
     mail_t *ret;
 
     assert(ret = malloc(sizeof(mail_t)));
-    memset(ret, 0, sizeof(mail_t));
 
-    //ret->fields = dhash_new(FIELDS_NBUCKETS, string_hash, strcmp);
+	ret->from = dlist_new();
+	ret->to = dlist_new();
+	ret->subject = dlist_new();
+
+	ret->rows = dlist_new();
 
     return ret;
 }
 
 void mail_free (mail_t *mail)
 {
-    //dhash_free(ret->fields, free, free);
+	dlist_free(mail->from, free);
+	dlist_free(mail->to, free);
+	dlist_free(mail->subject, free);
+	dlist_free(mail->rows, free);
 
-    /* Note: this works even if the fields are NULL */
-    free((void *)(mail->from));
-    free((void *)(mail->to));
-    free((void *)(mail->subject));
+	free(mail);
+}
+
+#include <stdio.h>
+void mail_set_from (mail_t *mail, const char *from)
+{
+	printf("Setting from: '%s'\n", from);
+	mail->from = dlist_append(mail->from, (void *)from);
+}
+
+void mail_set_to (mail_t *mail, const char *to)
+{
+	printf("Setting to: '%s'\n", to);
+	mail->to = dlist_append(mail->to, (void *)to);
+}
+
+void mail_set_subject (mail_t *mail, const char *subject)
+{
+	printf("Setting subject: '%s'\n", subject);
+	mail->subject = dlist_append(mail->subject, (void *)subject);
+}
+
+void mail_append (mail_t *mail, const char *row)
+{
+	printf("Generic line: '%s'\n", row);
+	mail->rows = dlist_append(mail->rows, (void *)row);
 }
 

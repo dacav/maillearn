@@ -23,45 +23,126 @@
 #include "datatypes.h"
 #include "strings.h"
 #include "parse.h"
+#include "mail.h"
 
 #include <regex.h>
 #include <assert.h>
+#include <stdlib.h>
+#include <ctype.h>
 
-#define PARSE_BUFLEN    32
-#define PARSE_FMT       "%32[^\n]\n"
+/* Enqueues a mail object. If the operationg gets aborted by any other
+ * thread, every element gets extracted and freed.
+ */
+static
+int enqueue_mail (mbox_t *mbox, mail_t *mail)
+{
+    register thrdqueue_t *q = mbox->mail_queue;
 
-#include <stdio.h>
+    if (thq_insert(q, (void *)mail)) {
+        mail_free(mail);
+        /* abort required */
+        while (thq_extract_nowait(q, (void **)&mail) == 0) {
+            mail_free(mail);
+        }
+        return 1;
+    }
+    return 0;
+}
 
 static inline
 int match_mailstart (parse_t *p, const char *str)
 {
-    return regexec(&p->mailstart, str, 0, NULL, 0) == 0;
+    return regexec(&p->mailstart, str, 0, NULL, 0) != REG_NOMATCH;
+}
+
+static inline
+int match_from (parse_t *p, const char *str, regmatch_t *positions)
+{
+    return regexec(&p->fld_from, str, 2, positions, 0) != REG_NOMATCH;
+}
+
+static inline
+int match_to (parse_t *p, const char *str, regmatch_t *positions)
+{
+    return regexec(&p->fld_to, str, 2, positions, 0) != REG_NOMATCH;
+}
+
+static inline
+int match_subject (parse_t *p, const char *str, regmatch_t *positions)
+{
+    return regexec(&p->fld_subject, str, 2, positions, 0) != REG_NOMATCH;
 }
 
 void mbox_parse (mbox_t *mbox)
 {
-    char buffer[PARSE_BUFLEN];
-    parse_t *p = &mbox->parse;
-    int val;
+    char *line;
+    size_t n;
+    ssize_t len;
+    mail_t *mail;
 
-    // TODO implement business logic
-    while ((val = fscanf(mbox->file, PARSE_FMT, buffer) != EOF)
-            && val > 0) {
-        if (match_mailstart(p, buffer)) {
-            printf("FOUND? '%s'\n", buffer);
+    register parse_t *p = &mbox->parse;
+    void (*setter) (mail_t *, const char *) = NULL;
+
+    line = NULL;
+    mail = NULL;
+    while ((len = getline(&line, &n, mbox->file)) >= 0) {
+        line[len - 1] = 0;  /* Remove trailing \n */
+
+        /* If we have found a 'From ' line we start a new mail (and
+         * enqueue the previous one
+         */
+        if (match_mailstart(p, line)) {
+            if (mail)
+                if (enqueue_mail(mbox, mail)) {
+                    /* Abort request */
+                    break;
+                }
+            mail = mail_new();
+            continue;
+        }
+
+        /* This conditional will skip any row not belonging to a mail
+         * (this should never happen though)
+         */
+        if (mail != NULL) {
+            register const char *s;
+            
+            if (!isspace(line[0])) {
+                regmatch_t match[2];
+                s = string_alloc(line, len);
+
+                /* A new logical line, select a possible setter, default
+                 * is mail_append */
+                setter = NULL;
+                if (match_from(p, line, match)) {
+                    setter = mail_set_from;
+                } else if (match_to(p, line, match)) {
+                    setter = mail_set_to;
+                } else if (match_subject(p, line, match)) {
+                    setter = mail_set_subject;
+                }
+            } else {
+                s = string_alloc(line + 1, len - 1);
+                /* This belongs to the previous logical line, we keep
+                 * using the previous setter */
+            }
+            mail_append(mail, s);
+            if (setter) setter(mail, s);
         }
     }
-    printf("END\n");
+    if (line) free(line);
+    // TODO: check EOF and return
 }
 
 void parse_init (parse_t *p)
 {
-    assert(!regcomp(&p->mailstart, "From .*", REG_NOSUB));
+    assert(!regcomp(&p->mailstart, "^From .*$", REG_NOSUB | REG_EXTENDED));
+    assert(!regcomp(&p->fld_from, "^From: *(.+)$", REG_EXTENDED));
+    assert(!regcomp(&p->fld_to, "^To: *(.+)$", REG_EXTENDED));
+    assert(!regcomp(&p->fld_subject, "^Subject: *(.+)$", REG_EXTENDED));
 }
 
 void parse_free (parse_t *p)
 {
     regfree(&p->mailstart);
 }
-
-

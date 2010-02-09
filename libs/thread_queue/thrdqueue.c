@@ -82,6 +82,24 @@ int thq_extract (thrdqueue_t *thq, void **el)
     return abort;
 }
 
+int thq_extract_nowait (thrdqueue_t *thq, void **el)
+{
+	register int ret;
+	register dlist_t *lst;
+
+    pthread_mutex_lock(&thq->cmux);
+	lst = thq->list;
+	if (dlist_empty(lst)) {
+		ret = 1;
+	} else {
+		thq->list = dlist_pop(lst, el);
+		ret = 0;
+	}
+    pthread_mutex_unlock(&thq->cmux);
+
+	return ret;
+}
+
 void thq_delete (thrdqueue_t *thq)
 {
     pthread_mutex_destroy(&thq->cmux);

@@ -17,7 +17,8 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 # 
 
-AM_CFLAGS = -pthread -std=gnu99 -Wall -Werror -I./mbox/ -I$(top_srcdir)/libs/thread_queue/
+AM_CFLAGS = -pthread -std=gnu99 -Wall -Werror -I./mbox/ \
+            -I$(top_srcdir)/libs/thread_queue/ -D_GNU_SOURCE
 
 lib_LIBRARIES = libmbox.a
 include_HEADERS = mbox.h

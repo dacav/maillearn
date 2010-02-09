@@ -30,14 +30,19 @@
 
 /* Managed by the private mail.c module. */
 typedef struct {
-    const char *from;
-    const char *to;
-    const char *subject;
+    dlist_t * from;
+    dlist_t * to;
+    dlist_t * subject;
+
+    dlist_t * rows;
 } mail_t;
 
 /* Managed by the parse.c module. */
 typedef struct {
     regex_t mailstart;      /* Starting of mail */
+    regex_t fld_from;       /* From field */
+    regex_t fld_to;         /* To field */
+    regex_t fld_subject;    /* Subject field */
 } parse_t;
 
 struct mbox {
