@@ -38,12 +38,8 @@ int enqueue_mail (mbox_t *mbox, mail_t *mail)
 {
     register thrdqueue_t *q = mbox->mail_queue;
 
-    if (thq_insert(q, (void *)mail)) {
-        mail_free(mail);
-        /* abort required */
-        while (thq_extract_nowait(q, (void **)&mail) == 0) {
-            mail_free(mail);
-        }
+    if (thq_insert(q, (void *)mail) == THQ_UNALLOWED) {
+        /* There has been an abort! Dispatch the exit signal! */
         return 1;
     }
     return 0;
@@ -73,7 +69,7 @@ int match_subject (parse_t *p, const char *str, regmatch_t *positions)
     return regexec(&p->fld_subject, str, 2, positions, 0) != REG_NOMATCH;
 }
 
-void mbox_parse (mbox_t *mbox)
+int mbox_parse (mbox_t *mbox)
 {
     char *line;
     size_t n;
@@ -94,7 +90,7 @@ void mbox_parse (mbox_t *mbox)
         if (match_mailstart(p, line)) {
             if (mail)
                 if (enqueue_mail(mbox, mail)) {
-                    /* Abort request */
+                    /* Abort request, break cycle */
                     break;
                 }
             mail = mail_new();
@@ -131,7 +127,7 @@ void mbox_parse (mbox_t *mbox)
         }
     }
     if (line) free(line);
-    // TODO: check EOF and return
+    return feof(mbox->file) ? 0 : 1;
 }
 
 void parse_init (parse_t *p)

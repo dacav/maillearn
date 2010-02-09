@@ -29,33 +29,46 @@ typedef struct thrdqueue thrdqueue_t;
 /* Initializes a new queue of len elements */
 thrdqueue_t * thq_new ();
 
-/* Extracts the first element (or locks on the queue if no element is
- * available) 
- *
- * Returns 1 if thq_abort has been called on the queue, in which case the
- * element will not be extracted.
- */
-int thq_extract (thrdqueue_t *thq, void **el);
+typedef enum {
+    THQ_SUCCESS = 0,         /* Normally working */
+    THQ_UNALLOWED,           /* Operation not allowed */
+    THQ_ABORTED,             /* Operation aborted */
+    THQ_ENDDATA
+} thq_status_t;
 
-/* Inserts an element (or locks on the queue if there are no slot
- * available).
+/* Try to extract the oldest element.
  *
- * Returns 1 if thq_abort has been called on the queue, in which case the
- * element will NOT be inserted (therefore you may need to free it).
+ * - Locks if there are no elements for the moment;
+ * - Returns THQ_ENDDATA if there won't be any other element (thq_enddata
+ *                      called by the producer);
+ * - Returns THQ_SUCCESS if the extraction has been achieved;
+ * - Returns THQ_ABORTED if the queue operation has been aborted.
  */
-int thq_insert (thrdqueue_t *thq, void *el);
+thq_status_t thq_extract (thrdqueue_t *thq, void **el);
 
-/* Forces all waiting processes to return */
+/* Try to insert an element.
+ *
+ * - Returns THQ_UNALLOWED if the queue has been aborted (thq_abort has
+ *                        been called) or if there won't be any other
+ *                        element (thq_enddata has been called);
+ * - Returns THQ_SUCCESS on success.
+ */
+thq_status_t thq_insert (thrdqueue_t *thq, void *el);
+
+/* Forces all waiting processes to return, leaving any element enqueued.
+ *
+ * In order to remove elements, use the thq_delete procedure.
+ */
 void thq_abort (thrdqueue_t *thq);
 
-/* Extracts an element without locking if the queue is empty, and
- * returning 1 instead. Returns 0 the extraction succeeds (i.e. we have at
- * least one element).
- */
-int thq_extract_nowait (thrdqueue_t *thq, void **el);
+/* Signals the end of data */
+void thq_enddata (thrdqueue_t *thq);
 
-/* Deletes a queue. Note: you should call thq_abort() first in order to
- * avoid unpredicible behaviours. */
-void thq_delete (thrdqueue_t *thq);
+/* Deletes a queue and frees all stored elements.
+ *
+ * Note: this should be achieved only if safe on the threading point of
+ *       view, otherwise it may lead to unpredictable behaviors.
+ */
+void thq_delete (thrdqueue_t *thq, void (*memfree)(void *));
 
 #endif // __defined_thrdqueue_h

@@ -26,14 +26,19 @@
 
 #include <dacav.h>
 
+#define STATUS_ACTIVE 	0x00
+
+#define STATUS_ABORTED  0x01
+#define STATUS_ENDDATA  0x02
+#define STMASK_NOINSERT 0x03
+
 struct thrdqueue {
-    dlist_t* list;         /* Storage buffer elements */
+    dlist_t* list;          /* Storage buffer elements */
 
     pthread_cond_t empty;   /* Lock if queue is empty */
     pthread_mutex_t cmux;   /* Condition mutex */
 
-    int abort;
-
+	unsigned char status;
 };
 
 thrdqueue_t * thq_new ()
@@ -42,76 +47,68 @@ thrdqueue_t * thq_new ()
 
     assert(ret = malloc(sizeof(thrdqueue_t)));
 
+    ret->list = dlist_new();
+	ret->status = STATUS_ACTIVE;
+
     assert(pthread_cond_init(&ret->empty, NULL) == 0);
     assert(pthread_mutex_init(&ret->cmux, NULL) == 0);
-    ret->list = dlist_new();
-    ret->abort = 0;
 
     return ret;
 }
 
-int thq_insert (thrdqueue_t *thq, void *el)
+thq_status_t thq_insert (thrdqueue_t *thq, void *el)
 {
+	register thq_status_t status;
+
     pthread_mutex_lock(&thq->cmux);
-    if (thq->abort) {
+	status = thq->status;
+    if (status & STMASK_NOINSERT) {
         pthread_mutex_unlock(&thq->cmux);
-        return 1;
+        return THQ_UNALLOWED;
     }
     thq->list = dlist_append(thq->list, el);
     pthread_mutex_unlock(&thq->cmux);
-
     pthread_cond_signal(&thq->empty);
-
-    return 0;
+    return THQ_SUCCESS;
 }
 
-int thq_extract (thrdqueue_t *thq, void **el)
+thq_status_t thq_extract (thrdqueue_t *thq, void **el)
 {
-    register int abort;
+    register int status;
+    register int empty;
 
     pthread_mutex_lock(&thq->cmux);
-    while (dlist_empty(thq->list) && !thq->abort) {
+    while ((status = thq->status) != STATUS_ABORTED &&
+		   (empty = dlist_empty(thq->list))) {
         pthread_cond_wait(&thq->empty, &thq->cmux);
     }
-    abort = thq->abort;
-    if (!abort) {
-        thq->list = dlist_pop(thq->list, el);
-    }
-    pthread_mutex_unlock(&thq->cmux);
-
-    return abort;
-}
-
-int thq_extract_nowait (thrdqueue_t *thq, void **el)
-{
-	register int ret;
-	register dlist_t *lst;
-
-    pthread_mutex_lock(&thq->cmux);
-	lst = thq->list;
-	if (dlist_empty(lst)) {
-		ret = 1;
-	} else {
-		thq->list = dlist_pop(lst, el);
-		ret = 0;
+	if (!empty && status != STATUS_ABORTED) {
+		thq->list = dlist_pop(thq->list, el);
 	}
     pthread_mutex_unlock(&thq->cmux);
 
-	return ret;
-}
-
-void thq_delete (thrdqueue_t *thq)
-{
-    pthread_mutex_destroy(&thq->cmux);
-    pthread_cond_destroy(&thq->empty);
-    free(thq);
+	if (status == STATUS_ABORTED)
+		return THQ_ABORTED;
+	if (empty && status == STATUS_ENDDATA) {
+		return THQ_ENDDATA;
+	}
+	return THQ_SUCCESS;
 }
 
 void thq_abort (thrdqueue_t *thq)
 {
     pthread_mutex_lock(&thq->cmux);
-    thq->abort = 1;
+	thq->status = STATUS_ABORTED;
     pthread_mutex_unlock(&thq->cmux);
+
     pthread_cond_broadcast(&thq->empty);
+}
+
+void thq_delete (thrdqueue_t *thq, void (*memfree)(void *))
+{
+	dlist_free(thq->list, memfree);
+    pthread_mutex_destroy(&thq->cmux);
+    pthread_cond_destroy(&thq->empty);
+    free(thq);
 }
 

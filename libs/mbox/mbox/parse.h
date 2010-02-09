@@ -21,6 +21,6 @@
 #ifndef __defined_mbox_parse_h
 #define __defined_mbox_parse_h
 
-void mbox_parse (mbox_t *mbox);
+int mbox_parse (mbox_t *mbox);
 
 #endif // __defined_mbox_parse_h

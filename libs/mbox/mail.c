@@ -53,28 +53,23 @@ void mail_free (mail_t *mail)
 	free(mail);
 }
 
-#include <stdio.h>
 void mail_set_from (mail_t *mail, const char *from)
 {
-	printf("Setting from: '%s'\n", from);
 	mail->from = dlist_append(mail->from, (void *)from);
 }
 
 void mail_set_to (mail_t *mail, const char *to)
 {
-	printf("Setting to: '%s'\n", to);
 	mail->to = dlist_append(mail->to, (void *)to);
 }
 
 void mail_set_subject (mail_t *mail, const char *subject)
 {
-	printf("Setting subject: '%s'\n", subject);
 	mail->subject = dlist_append(mail->subject, (void *)subject);
 }
 
 void mail_append (mail_t *mail, const char *row)
 {
-	printf("Generic line: '%s'\n", row);
 	mail->rows = dlist_append(mail->rows, (void *)row);
 }
 

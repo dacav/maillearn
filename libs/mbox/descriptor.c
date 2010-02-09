@@ -28,6 +28,7 @@
 
 #include "datatypes.h"
 #include "parse.h"
+#include "mail.h"
 
 mbox_err_t mbox_new (const char *filename, mbox_t **mbox)
 {
@@ -50,7 +51,7 @@ void mbox_free (mbox_t *mbox)
 
     fclose(mbox->file);
 	thq_abort(q);
-	thq_delete(q);
+	thq_delete(q, (void (*)(void *))mail_free);
 
     parse_free(&mbox->parse);
 
