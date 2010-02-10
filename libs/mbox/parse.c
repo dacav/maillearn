@@ -148,5 +148,8 @@ void parse_init (parse_t *p)
 void parse_free (parse_t *p)
 {
     regfree(&p->mailstart);
+    regfree(&p->fld_from);
+    regfree(&p->fld_to);
+    regfree(&p->fld_subject);
 }
 
