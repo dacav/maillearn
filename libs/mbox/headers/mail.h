@@ -28,5 +28,4 @@ void mail_set_to (mail_t *mail, const char *to);
 void mail_set_subject (mail_t *mail, const char *subject);
 void mail_append (mail_t *mail, const char *row);
 
-
 #endif // __defined_mail_h

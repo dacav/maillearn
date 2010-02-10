@@ -72,16 +72,14 @@ int match_subject (parse_t *p, const char *str, regmatch_t *positions)
 
 int parse_start (mbox_t *mbox)
 {
-    char *line;
     size_t n;
     ssize_t len;
-    mail_t *mail;
-
-    register parse_t *p = &mbox->parse;
+    char *line = NULL;
+    mail_t *mail = NULL;
+    register const char *s = NULL;
     void (*setter) (mail_t *, const char *) = NULL;
+    register parse_t *p = &mbox->parse;
 
-    line = NULL;
-    mail = NULL;
     while ((len = getline(&line, &n, mbox->file)) >= 0) {
         line[len - 1] = 0;  /* Remove trailing \n */
 
@@ -89,11 +87,12 @@ int parse_start (mbox_t *mbox)
          * enqueue the previous one
          */
         if (match_mailstart(p, line)) {
-            if (mail)
+            if (mail) {
                 if (enqueue_mail(mbox, mail)) {
                     /* Abort request, break cycle */
                     break;
                 }
+            }
             mail = mail_new();
             continue;
         }
@@ -102,8 +101,6 @@ int parse_start (mbox_t *mbox)
          * (this should never happen though)
          */
         if (mail != NULL) {
-            register const char *s;
-            
             if (!isspace(line[0])) {
                 regmatch_t match[2];
                 s = string_alloc(line, len);
@@ -127,8 +124,12 @@ int parse_start (mbox_t *mbox)
             if (setter) setter(mail, s);
         }
     }
+
     if (line) free(line);
     if (feof(mbox->file)) {
+        if (mail) {
+            enqueue_mail(mbox, mail);
+        }
         thq_enddata(mbox->mail_queue);
         return 0;
     } else {
@@ -148,3 +149,4 @@ void parse_free (parse_t *p)
 {
     regfree(&p->mailstart);
 }
+

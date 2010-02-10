@@ -30,6 +30,7 @@ int main (int argc, char **argv)
     mbox_err_t err;
     mbox_t *mbox;
     mail_t *mail;
+    int i = 0;
 
     assert(argc > 1);
     err = mbox_new(argv[1], &mbox);
@@ -40,8 +41,8 @@ int main (int argc, char **argv)
 
     printf("Starting to read\n");
     while ((mail = mbox_next_mail (mbox)) != NULL) {
-        printf("Got mail! %p\n", (void *)mail);
-//        mail_free(mail);
+        printf("Got mail! %d %p\n", i ++, (void *)mail);
+        mail_free(mail);
     }
 
     mbox_free(mbox);

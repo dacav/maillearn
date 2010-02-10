@@ -23,6 +23,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <stdio.h>
 
 #include <dacav.h>
 
@@ -38,6 +39,7 @@ struct thrdqueue {
     pthread_cond_t empty;   /* Lock if queue is empty */
     pthread_mutex_t cmux;   /* Condition mutex */
 
+    pthread_cond_t enddata; /* Lock until data is flushed */
 	unsigned char status;
 };
 
@@ -51,6 +53,7 @@ thrdqueue_t * thq_new ()
 	ret->status = STATUS_ACTIVE;
 
     assert(pthread_cond_init(&ret->empty, NULL) == 0);
+    assert(pthread_cond_init(&ret->enddata, NULL) == 0);
     assert(pthread_mutex_init(&ret->cmux, NULL) == 0);
 
     return ret;
@@ -75,10 +78,10 @@ thq_status_t thq_insert (thrdqueue_t *thq, void *el)
 thq_status_t thq_extract (thrdqueue_t *thq, void **el)
 {
     register int status;
-    register int empty;
+    register int empty = 0;
 
     pthread_mutex_lock(&thq->cmux);
-    while ((status = thq->status) != STATUS_ABORTED &&
+    while ((status = thq->status) == STATUS_ACTIVE &&
 		   (empty = dlist_empty(thq->list))) {
         pthread_cond_wait(&thq->empty, &thq->cmux);
     }
@@ -90,6 +93,7 @@ thq_status_t thq_extract (thrdqueue_t *thq, void **el)
 	if (status == STATUS_ABORTED)
 		return THQ_ABORTED;
 	if (empty && status == STATUS_ENDDATA) {
+        pthread_cond_signal(&thq->enddata);
 		return THQ_ENDDATA;
 	}
 	return THQ_SUCCESS;
@@ -114,11 +118,18 @@ void thq_delete (thrdqueue_t *thq, void (*memfree)(void *))
 	dlist_free(thq->list, memfree);
     pthread_mutex_destroy(&thq->cmux);
     pthread_cond_destroy(&thq->empty);
+    pthread_cond_destroy(&thq->enddata);
     free(thq);
 }
 
 void thq_enddata (thrdqueue_t *thq)
 {
     set_status(thq, STATUS_ENDDATA);
+    pthread_cond_broadcast(&thq->empty);
+    pthread_mutex_lock(&thq->cmux);
+    while (!dlist_empty(thq->list)) {
+        pthread_cond_wait(&thq->enddata, &thq->cmux);
+    }
+    pthread_mutex_unlock(&thq->cmux);
 }
 

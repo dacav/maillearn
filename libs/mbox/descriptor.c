@@ -59,8 +59,6 @@ void mbox_free (mbox_t *mbox)
 {
 	register thrdqueue_t *q = mbox->mail_queue;
 
-    fclose(mbox->file);
-	thq_abort(q);
     pthread_join(mbox->parser, NULL);
 	thq_delete(q, (void (*)(void *))mail_free);
     parse_free(&mbox->parse);

@@ -61,7 +61,11 @@ thq_status_t thq_insert (thrdqueue_t *thq, void *el);
  */
 void thq_abort (thrdqueue_t *thq);
 
-/* Signals the end of data */
+/* Signals the end of data.
+ *
+ * This function locks until every element of the queue has been flushed
+ * or thq_abort() has been called.
+ */
 void thq_enddata (thrdqueue_t *thq);
 
 /* Deletes a queue and frees all stored elements.
