@@ -27,14 +27,9 @@ mail_t *mbox_next_mail (mbox_t *mbox)
 {
     mail_t *ret;
 
-    switch (thq_extract(mbox->mail_queue, (void **)&ret)) {
-        case THQ_ENDDATA:
-        case THQ_ABORTED:
-            return NULL;
-        case THQ_SUCCESS:
-            return ret;
-        default:
-            return NULL;
+    if (thq_extract(mbox->mail_queue, (void **)&ret) == THQ_SUCCESS) {
+        return ret;
     }
+    return NULL;
 }
 

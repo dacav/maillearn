@@ -32,8 +32,7 @@ thrdqueue_t * thq_new ();
 typedef enum {
     THQ_SUCCESS = 0,         /* Normally working */
     THQ_UNALLOWED,           /* Operation not allowed */
-    THQ_ABORTED,             /* Operation aborted */
-    THQ_ENDDATA
+    THQ_ENDDATA              /* Data exausted */
 } thq_status_t;
 
 /* Try to extract the oldest element.
@@ -54,12 +53,6 @@ thq_status_t thq_extract (thrdqueue_t *thq, void **el);
  * - Returns THQ_SUCCESS on success.
  */
 thq_status_t thq_insert (thrdqueue_t *thq, void *el);
-
-/* Forces all waiting processes to return, leaving any element enqueued.
- *
- * In order to remove elements, use the thq_delete procedure.
- */
-void thq_abort (thrdqueue_t *thq);
 
 /* Signals the end of data.
  *

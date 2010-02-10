@@ -28,9 +28,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define FIELDS_NBUCKETS 5
-
-int j; // FIXME remove
 mail_t * mail_new ()
 {
     mail_t *ret;
@@ -43,20 +40,15 @@ mail_t * mail_new ()
 
 	ret->rows = dlist_new();
 
-    printf("Allocated mail %d\n", j++);
-
     return ret;
 }
 
-int i; // FIXME remove
 void mail_free (mail_t *mail)
 {
 	dlist_free(mail->from, NULL);
 	dlist_free(mail->to, NULL);
 	dlist_free(mail->subject, NULL);
 	dlist_free(mail->rows, free);
-
-    printf("Freed mail %d\n", i++);
 
 	free(mail);
 }
