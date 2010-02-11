@@ -52,13 +52,8 @@ int  parse_match (parse_t *parse, char *str, char **key, char **value)
     char remember;
 
     if (regexec(&parse->field, str, 3, match, 0) == REG_NOMATCH) {
-        printf("NABBO \n");
         return 0;
     }
-
-    printf("MATCHED! rm_so=%d rm_eo=%d - rm_so=%d rm_eo=%d\n",
-            match[1].rm_so, match[1].rm_eo,
-            match[2].rm_so, match[2].rm_eo);
 
     /* Temporarily replace the end bound of the first match (this allows
      * us to get a null-terminated string) */
@@ -78,7 +73,8 @@ int  parse_match (parse_t *parse, char *str, char **key, char **value)
     /* Same trick for value. This time allocate it without asking. */
     tmp = str + match[2].rm_eo;
     remember = *tmp; *tmp = 0;
-    *key = string_alloc(str, match[2].rm_eo - match[2].rm_so);
+    *value = string_alloc(str + match[2].rm_so,
+                          match[2].rm_eo - match[2].rm_so);
     *tmp = remember;
 
     return 1;

@@ -39,7 +39,6 @@ mbox_mail_t * mail_new ()
     assert(ret = malloc(sizeof(mbox_mail_t)));
     ret->fields = dhash_new(MAIL_HASH_SIZE, (dhash_func_t)string_hash,
                                             (dcmp_func_t)strcmp);
-
     return ret;
 }
 
@@ -60,16 +59,12 @@ void mail_append (mbox_t *mbox, mbox_mail_t *mail, char *row)
         /* Create a new field */
     }
 #endif
+    // TODO FIX HERE
 
-    printf("ROW: '%s'\n", row);
     if (parse_match(&mbox->parse, row, &key, &value)) {
-        printf("KEY: address=%p content='%s'\n", key, key);
-        printf("VALUE: address=%p content='%s'\n", value, value);
+        dhash_insert(mail->fields, (void *)key, (void *)value);
     } else {
-        printf("NOT MATCHING\n");
     }
-
-    dhash_insert(mail->fields, (void *)key, (void *)value);
 }
 
 #if 0
