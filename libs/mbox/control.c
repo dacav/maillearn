@@ -30,11 +30,12 @@
 #include "headers/datatypes.h"
 #include "headers/parse.h"
 #include "headers/mail.h"
+#include "headers/split.h"
 
 static
 void * parsing_thread (void *arg)
 {
-    return (void *)parse_start((mbox_t *)arg);
+    return (void *)split_start((mbox_t *)arg);
 }
 
 mbox_err_t mbox_new (const char *filename, mbox_t **mbox)
@@ -45,8 +46,7 @@ mbox_err_t mbox_new (const char *filename, mbox_t **mbox)
     if ((ret->file = fopen(filename, "rt")) == NULL) {
         return MBOX_OPENING;
     }
-	ret->mail_queue = thq_new();
-    parse_init(&ret->parse);
+    ret->mail_queue = thq_new();
     *mbox = ret;
 
     assert(pthread_create(&ret->parser, NULL, parsing_thread,
@@ -57,11 +57,10 @@ mbox_err_t mbox_new (const char *filename, mbox_t **mbox)
 
 void mbox_free (mbox_t *mbox)
 {
-	register thrdqueue_t *q = mbox->mail_queue;
+    register thrdqueue_t *q = mbox->mail_queue;
 
     pthread_join(mbox->parser, NULL);
-	thq_delete(q, (void (*)(void *))mail_free);
-    parse_free(&mbox->parse);
+    thq_delete(q, (void (*)(void *))mail_free);
 
     free(mbox);
 }

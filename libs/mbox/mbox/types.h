@@ -22,6 +22,6 @@
 #define __defined_mbox_types_h
 
 typedef struct mbox mbox_t;
-typedef struct mail mail_t;
+typedef struct mbox_mail mbox_mail_t;
 
 #endif // __defined_mbox_types_h

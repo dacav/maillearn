@@ -25,6 +25,9 @@
 
 void parse_init (parse_t *p);
 void parse_free (parse_t *p);
-int  parse_start (mbox_t *mbox);
+
+/* Returns 1 if the match succeded and 0 otherwise */
+int  parse_match (parse_t *parse, const char *str,
+                  const char **key, const char **value);
 
 #endif // __defined_parse_h

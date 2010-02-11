@@ -22,37 +22,82 @@
 
 #include "headers/datatypes.h"
 #include "headers/strings.h"
+#include "headers/parse.h"
 
 #include <dacav.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
-mail_t * mail_new ()
+#define MAIL_HASH_SIZE 5
+
+mbox_mail_t * mail_new ()
 {
-    mail_t *ret;
+    mbox_mail_t *ret;
 
-    assert(ret = malloc(sizeof(mail_t)));
-
-	ret->from = dlist_new();
-	ret->to = dlist_new();
-	ret->subject = dlist_new();
-
-	ret->rows = dlist_new();
+    assert(ret = malloc(sizeof(mbox_mail_t)));
+    ret->fields = dhash_new(MAIL_HASH_SIZE, (dhash_func_t)string_hash,
+                                            (dcmp_func_t)strcmp);
 
     return ret;
 }
 
-void mail_free (mail_t *mail)
+void mail_free (mbox_mail_t *mail)
 {
-	dlist_free(mail->from, NULL);
-	dlist_free(mail->to, NULL);
-	dlist_free(mail->subject, NULL);
-	dlist_free(mail->rows, free);
-
+    dhash_free(mail->fields, NULL, free);
 	free(mail);
 }
 
+void mail_append (mbox_t *mbox, mbox_mail_t *mail, const char *row)
+{
+    const char *key, *value;
+
+#if 0
+    if (isspace(row[0])) {
+        /* Append to old field or ignore if there's no such field. */
+    } else {
+        /* Create a new field */
+    }
+#endif
+
+    printf("ROW: '%s'\n", row);
+    printf("MATCH? %d\n", parse_match(&mbox->parse, row, &key, &value));
+    printf("KEY: address=%p content='%s'\n", key, key);
+    printf("VALUE: address=%p content='%s'\n", value, value);
+
+    dhash_insert(mail->fields, (void *)key, (void *)value);
+}
+
+#if 0
+
+            if (!isspace(line[0])) {
+                regmatch_t match[2];
+                s = string_alloc(line, len);
+
+                /* A new logical line, select a possible setter, default
+                 * is mail_append */
+                setter = NULL;
+                if (match_from(p, line, match)) {
+                    setter = mail_set_from;
+                } else if (match_to(p, line, match)) {
+                    setter = mail_set_to;
+                } else if (match_subject(p, line, match)) {
+                    setter = mail_set_subject;
+                }
+            } else {
+                s = string_alloc(line + 1, len - 1);
+                /* This belongs to the previous logical line, we keep
+                 * using the previous setter */
+            }
+            mail_append(mail, s);
+            if (setter) setter(mail, s);
+
+#endif
+
+
+
+#if 0
 void mail_set_from (mail_t *mail, const char *from)
 {
 	mail->from = dlist_append(mail->from, (void *)from);
@@ -72,4 +117,5 @@ void mail_append (mail_t *mail, const char *row)
 {
 	mail->rows = dlist_append(mail->rows, (void *)row);
 }
+#endif
 

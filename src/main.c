@@ -29,7 +29,7 @@ int main (int argc, char **argv)
 {
     mbox_err_t err;
     mbox_t *mbox;
-    mail_t *mail;
+    mbox_mail_t *mail;
     int i = 0;
 
     assert(argc > 1);

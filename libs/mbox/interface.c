@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 2010 Giovanni Simoni
+ * Copyright 2010 Giovanni Simoni
  *
  * This file is part of maillearn.
  *
@@ -18,36 +18,18 @@
  *
  */
 
-#include "headers/strings.h"
+#include <mbox.h>
 
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
+#include "headers/datatypes.h"
+#include <thrdqueue.h>
 
-unsigned long string_hash (const unsigned char *name)
+mbox_mail_t *mbox_next_mail (mbox_t *mbox)
 {
-    unsigned long h = 0, g;
-    while (*name) {
-        h = (h << 4) + *name++;
-        if ((g = h & 0xf0000000) != 0) {
-            h ^= g >> 24;
-        }
-        h &= ~g;
-    }
-    return h;
-}
+    mbox_mail_t *ret;
 
-char *string_alloc (char *orig, size_t len)
-{
-    register char *ret;
-
-    if (len == 0) {
-        len = strlen(orig);
+    if (thq_extract(mbox->mail_queue, (void **)&ret) == THQ_SUCCESS) {
+        return ret;
     }
-    // NOTE: we reserve room for the \0 character.
-    assert(ret = malloc((len + 1) * sizeof(char)));
-    strncpy(ret, orig, len);
-    ret[len] = 0;
-    return ret;
+    return NULL;
 }
 

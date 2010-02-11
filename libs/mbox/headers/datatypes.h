@@ -22,34 +22,21 @@
 #define __defined_datatypes_h
 
 #include <stdio.h>
-#include <sys/types.h>
 #include <regex.h>
 #include <pthread.h>
 
 #include <dacav.h>
 #include <thrdqueue.h>
 
-/* Managed by the private mail.c module. */
-typedef struct {
-    dlist_t *pieces;
-    size_t length;
-} field_t;
-
-/* Typedef'd on mail_t */
-struct mail {
-    dlist_t * from;
-    dlist_t * to;
-    dlist_t * subject;
-
-    dlist_t * rows;
+struct mbox_mail {
+    dhash_t *fields;
 };
 
-/* Managed by the parse.c module. */
 typedef struct {
-    regex_t mailstart;      /* Starting of mail */
-    regex_t fld_from;       /* From field */
-    regex_t fld_to;         /* To field */
-    regex_t fld_subject;    /* Subject field */
+    regex_t field;              /* Field splitting regex */
+    dhash_t *keys;              /* Keys used in mail objects */
+
+    dlist_t *accumulator;       /* Accumulator for multiple lines */
 } parse_t;
 
 /* Typedef'd on mbox_t */

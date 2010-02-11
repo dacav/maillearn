@@ -21,6 +21,6 @@
 #ifndef __defined_mbox_mail_h
 #define __defined_mbox_mail_h
 
-void mail_free (mail_t *mail);
+void mail_free (mbox_mail_t *mail);
 
 #endif // __defined_mbox_mail_h
