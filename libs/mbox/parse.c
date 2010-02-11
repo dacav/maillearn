@@ -20,6 +20,10 @@
 
 #include <mbox.h>
 
+#include <assert.h>
+#include <dacav.h>
+#include <string.h>
+
 #include "headers/datatypes.h"
 #include "headers/parse.h"
 #include "headers/strings.h"
@@ -29,8 +33,8 @@
 void parse_init (parse_t *p)
 {
     assert(regcomp(&p->field, "^([^: ]+) *: *(.+)$", REG_EXTENDED) == 0);
-    p->keys = dhash_init(PARSE_HASH_SIZE, (dhash_fun_t)string_hash,
-                         (dcmp_fun_t)strcmp);
+    p->keys = dhash_new(PARSE_HASH_SIZE, (dhash_func_t)string_hash,
+                        (dcmp_func_t)strcmp);
     p->accumulator = dlist_new();
 }
 
@@ -41,29 +45,33 @@ void parse_free (parse_t *p)
     dlist_free(p->accumulator, free);
 }
 
-int  parse_match (parse_t *parse, const char *str,
-                  const char **key, const char **value)
+int  parse_match (parse_t *parse, char *str, char **key, char **value)
 {
-    register const char *tmp;
+    register char *tmp;
     regmatch_t match[3];
-    const char remember;
+    char remember;
 
-    if (regexec(&p->field, str, 3, match, 0) == REG_NOMATCH) {
+    if (regexec(&parse->field, str, 3, match, 0) == REG_NOMATCH) {
+        printf("NABBO \n");
         return 0;
     }
+
+    printf("MATCHED! rm_so=%d rm_eo=%d - rm_so=%d rm_eo=%d\n",
+            match[1].rm_so, match[1].rm_eo,
+            match[2].rm_so, match[2].rm_eo);
 
     /* Temporarily replace the end bound of the first match (this allows
      * us to get a null-terminated string) */
     tmp = str + match[1].rm_eo;
     remember = *tmp; *tmp = 0;
-    if (dhash_search(p->keys, (const void *)str, (void **)key) ==
+    if (dhash_search(parse->keys, (const void *)str, (void **)key) ==
             DHASH_NOTFOUND) {
         /* Since we didn't find the key, we allocate it bare new */
-        register const char *s;
+        register char *s;
 
         s = string_alloc(str, match[1].rm_eo);
         *key = s;
-        dhash_insert(p->keys, (const void *)s, (const void *)s);
+        dhash_insert(parse->keys, (const void *)s, (const void *)s);
     }
     *tmp = remember;
 

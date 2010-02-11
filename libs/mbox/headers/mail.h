@@ -22,6 +22,6 @@
 #define __defined_mail_h
 
 mbox_mail_t * mail_new ();
-void mail_append (mbox_mail_t *mail, const char *row);
+void mail_append (mbox_t *mbox, mbox_mail_t *mail, char *row);
 
 #endif // __defined_mail_h

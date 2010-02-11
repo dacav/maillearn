@@ -84,7 +84,8 @@ int split_start (mbox_t *mbox)
          * (this should never happen though).
          */
         if (mail != NULL) {
-            mail_append(mail, line);
+            printf("STEP\n");
+            mail_append(mbox, mail, line);
         }
     }
 

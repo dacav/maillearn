@@ -30,6 +30,6 @@ includembox_HEADERS = mbox/descriptor.h mbox/error.h mbox/mail.h \
 libmbox_a_SOURCES = $(include_HEADERS) \
                     $(includembox_HEADERS) \
                     control.c error.c interface.c mail.c split.c \
-                    strings.c \
+                    strings.c parse.c \
                     headers/datatypes.h headers/mail.h headers/parse.h \
                     headers/strings.h

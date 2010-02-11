@@ -49,9 +49,9 @@ void mail_free (mbox_mail_t *mail)
 	free(mail);
 }
 
-void mail_append (mbox_t *mbox, mbox_mail_t *mail, const char *row)
+void mail_append (mbox_t *mbox, mbox_mail_t *mail, char *row)
 {
-    const char *key, *value;
+    char *key, *value;
 
 #if 0
     if (isspace(row[0])) {
@@ -62,9 +62,12 @@ void mail_append (mbox_t *mbox, mbox_mail_t *mail, const char *row)
 #endif
 
     printf("ROW: '%s'\n", row);
-    printf("MATCH? %d\n", parse_match(&mbox->parse, row, &key, &value));
-    printf("KEY: address=%p content='%s'\n", key, key);
-    printf("VALUE: address=%p content='%s'\n", value, value);
+    if (parse_match(&mbox->parse, row, &key, &value)) {
+        printf("KEY: address=%p content='%s'\n", key, key);
+        printf("VALUE: address=%p content='%s'\n", value, value);
+    } else {
+        printf("NOT MATCHING\n");
+    }
 
     dhash_insert(mail->fields, (void *)key, (void *)value);
 }

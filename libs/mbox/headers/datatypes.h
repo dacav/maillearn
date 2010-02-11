@@ -44,7 +44,7 @@ struct mbox {
     FILE *file;                 /* mbox file to be read */
     parse_t parse;              /* Parsing data */
     thrdqueue_t *mail_queue;    /* Queue of outgoing mails */
-    pthread_t parser;           /* Parsing thread */
+    pthread_t parser_th;        /* Parsing thread */
 };
 
 #endif // __defined_datatypes_h
