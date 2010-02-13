@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include <dacav.h>
 
@@ -39,9 +40,11 @@ int main (int argc, char **argv)
         exit(1);
     }
 
+    printf("Starting to get milk\n");
     while ((mail = mbox_next_mail (mbox)) != NULL) {
         printf("Got mail! %d %p\n", i ++, (void *)mail);
-        mail_free(mail);
+        printf("Is to [%s]\n", mbox_mail_getattr(mbox, mail, "To"));
+        mbox_mail_free(mail);
     }
     printf("LOL WUT?\n");
 

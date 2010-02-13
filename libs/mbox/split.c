@@ -28,7 +28,6 @@
 #include <regex.h>
 #include <assert.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <thrdqueue.h>
 
 /* Enqueues a mail object. If the operationg gets aborted by any other
@@ -54,17 +53,23 @@ int match_mailstart (regex_t *reg, parse_t *p, const char *str)
 
 int split_start (mbox_t *mbox)
 {
-    size_t n;
-    ssize_t len;
-    char *line = NULL;
     mbox_mail_t *mail = NULL;
     register parse_t *p = &mbox->parse;
     regex_t mailstart_re;
 
+    /* Used for getline */
+    size_t n;
+    ssize_t len;
+    char *line = NULL;
+
+    /* Selector for appending function */
+    void (*mail_append) (mbox_t *, mbox_mail_t *, char *, size_t);
+
     assert(!regcomp(&mailstart_re, "^From .*$", REG_NOSUB | REG_EXTENDED));
 
+    mail_append = NULL;
     while ((len = getline(&line, &n, mbox->file)) >= 0) {
-        line[len - 1] = 0;  /* Remove trailing \n */
+        line[--len] = 0;  /* Remove trailing \n */
 
         /* If we have found a 'From ' line we start a new mail (and
          * enqueue the previous one
@@ -77,6 +82,7 @@ int split_start (mbox_t *mbox)
                 }
             }
             mail = mail_new();
+            mail_append = mail_header_append;
             continue;
         }
 
@@ -84,7 +90,12 @@ int split_start (mbox_t *mbox)
          * (this should never happen though).
          */
         if (mail != NULL) {
-            mail_append(mbox, mail, line);
+            if (len == 0) {
+                mail_header_end(mbox, mail);    // signal end of header;
+                mail_append = mail_body_append; // from here we build body.
+            } else {
+                mail_append(mbox, mail, line, len);
+            }
         }
     }
 

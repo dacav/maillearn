@@ -30,13 +30,14 @@
 
 struct mbox_mail {
     dhash_t *fields;
+    dstrbuf_t *body;
+    // TODO mail protection with mutex
 };
 
 typedef struct {
     regex_t field;              /* Field splitting regex */
     dhash_t *keys;              /* Keys used in mail objects */
-
-    dlist_t *accumulator;       /* Accumulator for multiple lines */
+    pthread_mutex_t mx;         /* Protect keys hash */
 } parse_t;
 
 /* Typedef'd on mbox_t */
@@ -45,6 +46,12 @@ struct mbox {
     parse_t parse;              /* Parsing data */
     thrdqueue_t *mail_queue;    /* Queue of outgoing mails */
     pthread_t parser_th;        /* Parsing thread */
+
+    /* Auxiliary data, for internal use, during the parsing phase */
+    struct {
+        char *key;              /* Name of the field */
+        dstrbuf_t *multiline;   /* For multilined values */
+    } aux;
 };
 
 #endif // __defined_datatypes_h

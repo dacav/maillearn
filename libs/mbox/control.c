@@ -23,6 +23,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <pthread.h>
 
 #include <thrdqueue.h>
@@ -48,8 +49,12 @@ mbox_err_t mbox_new (const char *filename, mbox_t **mbox)
     }
     ret->mail_queue = thq_new();
     parse_init(&ret->parse);
+    ret->aux.key = NULL;
+    ret->aux.multiline = dstrbuf_new("\n", 1);
+
     *mbox = ret;
 
+    /* Starting thread */
     assert(pthread_create(&ret->parser_th, NULL, parsing_thread,
            (void *)ret) == 0);
 
@@ -60,9 +65,12 @@ void mbox_free (mbox_t *mbox)
 {
     register thrdqueue_t *q = mbox->mail_queue;
 
+    /* Join with thread */
     pthread_join(mbox->parser_th, NULL);
-    thq_delete(q, (void (*)(void *))mail_free);
+
+    thq_delete(q, (void (*)(void *))mbox_mail_free);
     parse_free(&mbox->parse);
+    dstrbuf_free(mbox->aux.multiline);
 
     free(mbox);
 }

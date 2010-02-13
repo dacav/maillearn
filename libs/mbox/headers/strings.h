@@ -26,7 +26,11 @@
 /* A hashing function for string, suitable for libdacav hashtables. */
 unsigned long string_hash (const unsigned char *name);
 
-/* Automatic allocation of a new string. For freeing just use free. */
+/* Automatic allocation of a new string. For freeing just use free.
+ * The len parameter is not comprensive of the trailing zero, so len+1
+ * bytes will be allocated, and 0 will be inserted at the end of the
+ * string.
+ */
 char *string_alloc (char *orig, size_t len);
 
 #endif // __defined_stringhash_h

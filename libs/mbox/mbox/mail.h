@@ -21,6 +21,8 @@
 #ifndef __defined_mbox_mail_h
 #define __defined_mbox_mail_h
 
-void mail_free (mbox_mail_t *mail);
+void mbox_mail_free (mbox_mail_t *mail);
+const char *mbox_mail_getattr (mbox_t *mbox, mbox_mail_t *mail,
+                               const char *key);
 
 #endif // __defined_mbox_mail_h

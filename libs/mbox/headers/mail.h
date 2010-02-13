@@ -22,6 +22,10 @@
 #define __defined_mail_h
 
 mbox_mail_t * mail_new ();
-void mail_append (mbox_t *mbox, mbox_mail_t *mail, char *row);
+void mail_header_append (mbox_t *mbox, mbox_mail_t *mail, char *row,
+                         size_t row_len);
+void mail_header_end (mbox_t *mbox, mbox_mail_t *mail);
+void mail_body_append (mbox_t *mbox, mbox_mail_t *mail, char *row,
+                       size_t row_len);
 
 #endif // __defined_mail_h

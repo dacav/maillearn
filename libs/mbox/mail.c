@@ -37,83 +37,69 @@ mbox_mail_t * mail_new ()
     mbox_mail_t *ret;
 
     assert(ret = malloc(sizeof(mbox_mail_t)));
-    ret->fields = dhash_new(MAIL_HASH_SIZE, (dhash_func_t)string_hash,
-                                            (dcmp_func_t)strcmp);
+    /* NOTE: the fields works directly with addresses as key thanks to the
+     *       parse_t::keys hash table. */
+    ret->fields = dhash_new(MAIL_HASH_SIZE, NULL, NULL);
+    ret->body = dstrbuf_new("\n", 1);
     return ret;
 }
 
-void mail_free (mbox_mail_t *mail)
+void mbox_mail_free (mbox_mail_t *mail)
 {
     dhash_free(mail->fields, NULL, free);
+    dstrbuf_free(mail->body);
 	free(mail);
 }
 
-void mail_append (mbox_t *mbox, mbox_mail_t *mail, char *row)
+void mail_body_append (mbox_t *mbox, mbox_mail_t *mail, char *row,
+                       size_t rowlen)
+{
+    dstrbuf_insert(mail->body, row, rowlen);
+}
+
+void mail_header_end (mbox_t *mbox, mbox_mail_t *mail)
+{
+    if (mbox->aux.key == NULL) return;
+    dhash_insert(mail->fields, mbox->aux.key, 
+                 dstrbuf_extract(mbox->aux.multiline));
+    mbox->aux.key = NULL;
+}
+
+void mail_header_append (mbox_t *mbox, mbox_mail_t *mail, char *row,
+                         size_t rowlen)
 {
     char *key, *value;
 
-#if 0
-    if (isspace(row[0])) {
-        /* Append to old field or ignore if there's no such field. */
-    } else {
-        /* Create a new field */
+    if (isspace(row[0]) && mbox->aux.key != NULL) {
+        /* Part of a previous header */
+        dstrbuf_insert(mbox->aux.multiline, row, rowlen);
+    } else if (parse_match(&mbox->parse, row, &key, &value)) {
+        /* New header */
+        mail_header_end(mbox, mail);    // store any previous open header.
+        mbox->aux.key = key;
+        dstrbuf_insert(mbox->aux.multiline, value, 0);
     }
-#endif
-    // TODO FIX HERE
+    /* Any other line is considered garbage. */
+}
 
-    if (parse_match(&mbox->parse, row, &key, &value)) {
-        dhash_insert(mail->fields, (void *)key, (void *)value);
-    } else {
+const char *mbox_mail_getattr (mbox_t *mbox, mbox_mail_t *mail,
+                               const char *key)
+{
+    const char *ret;
+    void *address;
+
+    pthread_mutex_lock(&mbox->parse.mx);
+    if (dhash_search(mbox->parse.keys, key, &address) ==
+            DHASH_NOTFOUND) {
+        address = NULL;
     }
+    pthread_mutex_unlock(&mbox->parse.mx);
+    if (address != NULL) {
+        if (dhash_search(mail->fields, address, (void **)&ret) ==
+                DHASH_NOTFOUND)
+            return NULL;
+        return ret;
+    }
+    return NULL;
 }
-
-#if 0
-
-            if (!isspace(line[0])) {
-                regmatch_t match[2];
-                s = string_alloc(line, len);
-
-                /* A new logical line, select a possible setter, default
-                 * is mail_append */
-                setter = NULL;
-                if (match_from(p, line, match)) {
-                    setter = mail_set_from;
-                } else if (match_to(p, line, match)) {
-                    setter = mail_set_to;
-                } else if (match_subject(p, line, match)) {
-                    setter = mail_set_subject;
-                }
-            } else {
-                s = string_alloc(line + 1, len - 1);
-                /* This belongs to the previous logical line, we keep
-                 * using the previous setter */
-            }
-            mail_append(mail, s);
-            if (setter) setter(mail, s);
-
-#endif
-
-
-
-#if 0
-void mail_set_from (mail_t *mail, const char *from)
-{
-	mail->from = dlist_append(mail->from, (void *)from);
-}
-
-void mail_set_to (mail_t *mail, const char *to)
-{
-	mail->to = dlist_append(mail->to, (void *)to);
-}
-
-void mail_set_subject (mail_t *mail, const char *subject)
-{
-	mail->subject = dlist_append(mail->subject, (void *)subject);
-}
-
-void mail_append (mail_t *mail, const char *row)
-{
-	mail->rows = dlist_append(mail->rows, (void *)row);
-}
-#endif
 
