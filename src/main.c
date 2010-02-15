@@ -52,6 +52,9 @@ int main (int argc, char **argv)
             printf("\t%s\n", (char *)diter_next(iter));
         }
         dlist_iter_free(iter);
+        printf("FOLLOWING TEXT\n");
+        printf("%s\n", mbox_mail_getbody(mail));
+        printf("END OF TEXT\n");
         mbox_mail_free(mail);
     }
     printf("LOL WUT?\n");

@@ -28,6 +28,11 @@ typedef enum {
     MBOX_OPENING
 } mbox_err_t;
 
+/** Convert a mbox_err_t value into the corresponding string
+ *
+ * @param err The error code;
+ * @return The corresponding error string.
+ */
 const char * mbox_strerr (mbox_err_t err);
 
 #endif // __defined_mbox_error_h

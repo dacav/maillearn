@@ -51,8 +51,10 @@ mbox_mail_t * mail_new (mbox_t *mbox)
 void mbox_mail_free (mbox_mail_t *mail)
 {
     dhash_free(mail->fields, NULL, free);
-    if (mail->body)
+    if (mail->body) {
+        /* If the mail text has not been read yet */
         dstrbuf_free(mail->body);
+    }
 
     /* Note: this may be null, but this is not a problem for free */
     free((void *)(mail->body_str));
@@ -82,7 +84,7 @@ void mail_header_end (mbox_t *mbox, mbox_mail_t *mail)
     } else {
         /* This should never happen. */
         free(lines);
-        abort();    // MAY REMOVE IT
+        abort();    // TODO remove this, eventually.
     }
     mbox->aux.key = NULL;
     mbox->aux.status = STATUS_NODATA;
@@ -137,14 +139,15 @@ const dlist_t *mbox_mail_gettrace (mbox_mail_t *mbox)
     return (const dlist_t *)(mbox->trace);
 }
 
-const char *mbox_mail_getbody (mbox_mail_t *mbox)
+const char *mbox_mail_getbody (mbox_mail_t *mail)
 {
-    register const char *body_str = mbox->body_str;
+    register const char *body_str = mail->body_str;
 
-    if (body_str) {
-        body_str = dstrbuf_extract(mbox->body);
-        mbox->body_str = body_str;
-        dstrbuf_free(mbox->body);
+    if (body_str == NULL) {
+        body_str = dstrbuf_extract(mail->body);
+        mail->body_str = body_str;
+        dstrbuf_free(mail->body);
+        mail->body = NULL;
     }
     return body_str;
 }

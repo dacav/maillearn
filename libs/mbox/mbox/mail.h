@@ -23,9 +23,41 @@
 
 #include <dacav.h>
 
+/** Frees a mail object 
+ *
+ * param mail The mail to be freed.
+ */
 void mbox_mail_free (mbox_mail_t *mail);
+
+/** Getter for attribute.
+ *
+ * @param mail The mail whose attribute will be extracted;
+ * @param key The attribute name;
+ * @return The required attribute (or NULL if such an attribus does not
+ *         exist in the mail attribute set).
+ */
 const char *mbox_mail_getattr (mbox_mail_t *mail, const char *key);
-const dlist_t *mbox_mail_gettrace (mbox_mail_t *mbox);
-const char *mbox_mail_getbody (mbox_mail_t *mbox);
+
+/* Getter for tracing information.
+ *  
+ * Tracing information is a list of Received and Return-path fields.
+ *
+ * @note The return value is deallocated automatically when
+ *       mbox_mail_free is called.
+ *
+ * @param @mail The mail whose trace will be extracted;
+ * @return A list of trace elements.
+ */
+const dlist_t *mbox_mail_gettrace (mbox_mail_t *mail);
+
+/** Returns the body of the mail as constant string
+ *
+ * @note The return value is deallocated automatically when
+ *       mbox_mail_free is called.
+ *
+ * @param mail The mail whose body will be extracted;
+ * @return A long, null-terminated string with \n characters.
+ */
+const char *mbox_mail_getbody (mbox_mail_t *mail);
 
 #endif // __defined_mbox_mail_h
