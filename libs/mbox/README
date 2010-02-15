@@ -1,0 +1,56 @@
+This library provides a multithreaded parsing mechanism for mbox format.
+
+MULTITHREADING BEHAVIOUR:
+
+    The mbox_new() calling will enable a scanning thread that extracts
+    data from the mbox file given as parameter. The mbox_free() function
+    will wait the termination of the thread.
+
+API REFERENCE:
+
+    You may simple have a look into the mbox folder. The API is quite
+    simply and straightforward.
+
+EXAMPLE OF USAGE:
+
+    #include <mbox.h>
+    #include <assert.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <unistd.h>
+
+    #include <dacav.h>
+
+    int main (int argc, char **argv)
+    {
+        mbox_err_t err;
+        mbox_t *mbox;
+        mbox_mail_t *mail;
+
+        assert(argc > 1);
+        err = mbox_new(argv[1], &mbox);
+        if (err) {
+            fprintf(stderr, "Mbox error: %s\n", mbox_strerr(err));
+            exit(1);
+        }
+
+        while ((mail = mbox_next_mail (mbox)) != NULL) {
+            const dlist_t *trace;
+            diter_t *iter;
+
+            printf("Recipients: %s\n", mbox_mail_getattr(mail, "To"));
+            printf("Mail trace:\n");
+            trace = mbox_mail_gettrace(mail);
+            iter = dlist_iter_new((dlist_t **)&trace);
+            while (diter_hasnext(iter)) {
+                printf("\t%s\n", (char *)diter_next(iter));
+            }
+            dlist_iter_free(iter);
+            mbox_mail_free(mail);
+        }
+
+        mbox_free(mbox);
+
+        exit(0);
+    }
+
