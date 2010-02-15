@@ -34,6 +34,8 @@
 void parse_init (parse_t *p)
 {
     assert(regcomp(&p->field, "^([^:]+): *(.+)$", REG_EXTENDED) == 0);
+    assert(regcomp(&p->trace, "^(Received|Return-path): *(.+)$",
+                   REG_EXTENDED) == 0);
     p->keys = dhash_new(PARSE_HASH_SIZE, (dhash_func_t)string_hash,
                         (dcmp_func_t)strcmp);
     pthread_mutex_init(&p->mx, NULL);
@@ -42,11 +44,31 @@ void parse_init (parse_t *p)
 void parse_free (parse_t *p)
 {
     regfree(&p->field);
+    regfree(&p->trace);
     dhash_free(p->keys, free, NULL);
     pthread_mutex_destroy(&p->mx);
 }
 
-int  parse_match (parse_t *parse, char *str, char **key, char **value)
+int  parse_trace (parse_t *parse, char *str, char **value)
+{
+    register char *tmp;
+    regmatch_t match[3];
+    char remember;
+
+    if (regexec(&parse->trace, str, 3, match, 0) == REG_NOMATCH) {
+        return 0;
+    }
+
+    tmp = str + match[2].rm_eo;
+    remember = *tmp; *tmp = 0;
+    *value = string_alloc(str + match[2].rm_so,
+                          match[2].rm_eo - match[2].rm_so);
+    *tmp = remember;
+
+    return 1;
+}
+
+int  parse_field (parse_t *parse, char *str, char **key, char **value)
 {
     register char *tmp;
     regmatch_t match[3];

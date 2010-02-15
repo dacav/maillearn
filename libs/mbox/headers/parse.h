@@ -26,7 +26,13 @@
 void parse_init (parse_t *p);
 void parse_free (parse_t *p);
 
-/* Returns 1 if the match succeded and 0 otherwise */
-int  parse_match (parse_t *parse, char *str, char **key, char **value);
+/* Matches a trace field ('Received' or 'Return-path'.
+ * Returns 1 if the match succeded and 0 otherwise */
+int  parse_trace (parse_t *parse, char *str, char **value);
+
+/* Matches a generic field. If needed the key is created into parse.
+ * Returns 1 if the match succeded and 0 otherwise */
+int  parse_field (parse_t *parse, char *str, char **key,
+                  char **value);
 
 #endif // __defined_parse_h

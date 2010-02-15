@@ -32,22 +32,31 @@
 
 #define MAIL_HASH_SIZE 5
 
-mbox_mail_t * mail_new ()
+mbox_mail_t * mail_new (mbox_t *mbox)
 {
     mbox_mail_t *ret;
 
     assert(ret = malloc(sizeof(mbox_mail_t)));
+    ret->trace = dlist_new();
     /* NOTE: the fields works directly with addresses as key thanks to the
      *       parse_t::keys hash table. */
     ret->fields = dhash_new(MAIL_HASH_SIZE, NULL, NULL);
     ret->body = dstrbuf_new("\n", 1);
+    ret->body_str = NULL;
+    ret->mbox = mbox;
+
     return ret;
 }
 
 void mbox_mail_free (mbox_mail_t *mail)
 {
     dhash_free(mail->fields, NULL, free);
-    dstrbuf_free(mail->body);
+    if (mail->body)
+        dstrbuf_free(mail->body);
+
+    /* Note: this may be null, but this is not a problem for free */
+    free((void *)(mail->body_str));
+
 	free(mail);
 }
 
@@ -59,10 +68,24 @@ void mail_body_append (mbox_t *mbox, mbox_mail_t *mail, char *row,
 
 void mail_header_end (mbox_t *mbox, mbox_mail_t *mail)
 {
-    if (mbox->aux.key == NULL) return;
-    dhash_insert(mail->fields, mbox->aux.key, 
-                 dstrbuf_extract(mbox->aux.multiline));
+    register int status = mbox->aux.status;
+    register char *lines;
+
+    if (status == STATUS_NODATA) return;
+    lines = dstrbuf_extract(mbox->aux.multiline);
+    if (status == STATUS_FIELD && mbox->aux.key != NULL) {
+        /* Registering a field */
+        dhash_insert(mail->fields, mbox->aux.key, lines);
+    } else if (status == STATUS_TRACE) {
+        /* Append */
+        mail->trace = dlist_append(mail->trace, lines);
+    } else {
+        /* This should never happen. */
+        free(lines);
+        abort();    // MAY REMOVE IT
+    }
     mbox->aux.key = NULL;
+    mbox->aux.status = STATUS_NODATA;
 }
 
 void mail_header_append (mbox_t *mbox, mbox_mail_t *mail, char *row,
@@ -70,23 +93,29 @@ void mail_header_append (mbox_t *mbox, mbox_mail_t *mail, char *row,
 {
     char *key, *value;
 
-    if (isspace(row[0]) && mbox->aux.key != NULL) {
+    if (isspace(row[0]) && mbox->aux.status != STATUS_NODATA) {
         /* Part of a previous header */
         dstrbuf_insert(mbox->aux.multiline, row, rowlen);
-    } else if (parse_match(&mbox->parse, row, &key, &value)) {
-        /* New header */
+    } else {
         mail_header_end(mbox, mail);    // store any previous open header.
-        mbox->aux.key = key;
+        if (parse_trace(&mbox->parse, row, &value)) {
+            /* A new trace field */
+            mbox->aux.status = STATUS_TRACE;
+        } else if (parse_field(&mbox->parse, row, &key, &value)) {
+            /* A new generic field */
+            mbox->aux.key = key;
+            mbox->aux.status = STATUS_FIELD;
+        }
         dstrbuf_insert(mbox->aux.multiline, value, 0);
     }
     /* Any other line is considered garbage. */
 }
 
-const char *mbox_mail_getattr (mbox_t *mbox, mbox_mail_t *mail,
-                               const char *key)
+const char *mbox_mail_getattr (mbox_mail_t *mail, const char *key)
 {
     const char *ret;
     void *address;
+    register mbox_t *mbox = mail->mbox;
 
     pthread_mutex_lock(&mbox->parse.mx);
     if (dhash_search(mbox->parse.keys, key, &address) ==
@@ -101,5 +130,22 @@ const char *mbox_mail_getattr (mbox_t *mbox, mbox_mail_t *mail,
         return ret;
     }
     return NULL;
+}
+
+const dlist_t *mbox_mail_gettrace (mbox_mail_t *mbox)
+{
+    return (const dlist_t *)(mbox->trace);
+}
+
+const char *mbox_mail_getbody (mbox_mail_t *mbox)
+{
+    register const char *body_str = mbox->body_str;
+
+    if (body_str) {
+        body_str = dstrbuf_extract(mbox->body);
+        mbox->body_str = body_str;
+        dstrbuf_free(mbox->body);
+    }
+    return body_str;
 }
 

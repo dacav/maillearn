@@ -81,7 +81,7 @@ int split_start (mbox_t *mbox)
                     break;
                 }
             }
-            mail = mail_new();
+            mail = mail_new(mbox);
             mail_append = mail_header_append;
             continue;
         }

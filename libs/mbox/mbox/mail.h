@@ -21,8 +21,11 @@
 #ifndef __defined_mbox_mail_h
 #define __defined_mbox_mail_h
 
+#include <dacav.h>
+
 void mbox_mail_free (mbox_mail_t *mail);
-const char *mbox_mail_getattr (mbox_t *mbox, mbox_mail_t *mail,
-                               const char *key);
+const char *mbox_mail_getattr (mbox_mail_t *mail, const char *key);
+const dlist_t *mbox_mail_gettrace (mbox_mail_t *mbox);
+const char *mbox_mail_getbody (mbox_mail_t *mbox);
 
 #endif // __defined_mbox_mail_h

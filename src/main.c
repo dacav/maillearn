@@ -31,7 +31,6 @@ int main (int argc, char **argv)
     mbox_err_t err;
     mbox_t *mbox;
     mbox_mail_t *mail;
-    int i = 0;
 
     assert(argc > 1);
     err = mbox_new(argv[1], &mbox);
@@ -42,8 +41,17 @@ int main (int argc, char **argv)
 
     printf("Starting to get milk\n");
     while ((mail = mbox_next_mail (mbox)) != NULL) {
-        printf("Got mail! %d %p\n", i ++, (void *)mail);
-        printf("Is to [%s]\n", mbox_mail_getattr(mbox, mail, "To"));
+        const dlist_t *trace;
+        diter_t *iter;
+
+        printf("Is to [%s]\n", mbox_mail_getattr(mail, "To"));
+        printf("Mail trace:\n");
+        trace = mbox_mail_gettrace(mail);
+        iter = dlist_iter_new((dlist_t **)&trace);
+        while (diter_hasnext(iter)) {
+            printf("\t%s\n", (char *)diter_next(iter));
+        }
+        dlist_iter_free(iter);
         mbox_mail_free(mail);
     }
     printf("LOL WUT?\n");

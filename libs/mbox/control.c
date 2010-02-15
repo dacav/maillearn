@@ -50,7 +50,8 @@ mbox_err_t mbox_new (const char *filename, mbox_t **mbox)
     ret->mail_queue = thq_new();
     parse_init(&ret->parse);
     ret->aux.key = NULL;
-    ret->aux.multiline = dstrbuf_new("\n", 1);
+    ret->aux.multiline = dstrbuf_new(NULL, 0);
+    ret->aux.status = STATUS_NODATA;
 
     *mbox = ret;
 

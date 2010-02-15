@@ -29,15 +29,27 @@
 #include <thrdqueue.h>
 
 struct mbox_mail {
-    dhash_t *fields;
-    dstrbuf_t *body;
+    dlist_t *trace;             /* Sequence of trace fields */
+    dhash_t *fields;            /* Generic fields */
+
+    /* About body lines extraction:
+     *      body        is used during mail construction;
+     *      body_str    is constructed at the first reading (while body
+     *                  is cleaned and setted to null.
+     */
+    dstrbuf_t *body;            /* Body lines */
+    const char *body_str;       /* Body lines extracted */
     // TODO mail protection with mutex
+
+    mbox_t *mbox;               /* Pointer to mailbox */
 };
 
 typedef struct {
-    regex_t field;              /* Field splitting regex */
     dhash_t *keys;              /* Keys used in mail objects */
     pthread_mutex_t mx;         /* Protect keys hash */
+
+    regex_t trace;              /* Trace field regex */
+    regex_t field;              /* Generic field regex */
 } parse_t;
 
 /* Typedef'd on mbox_t */
@@ -49,9 +61,15 @@ struct mbox {
 
     /* Auxiliary data, for internal use, during the parsing phase */
     struct {
+        enum {
+           STATUS_NODATA,       /* Not recording */
+           STATUS_TRACE,        /* Recording a trace field */
+           STATUS_FIELD         /* Recording a generic field */
+        } status;
         char *key;              /* Name of the field */
         dstrbuf_t *multiline;   /* For multilined values */
     } aux;
 };
 
 #endif // __defined_datatypes_h
+
