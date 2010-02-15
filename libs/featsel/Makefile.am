@@ -17,6 +17,14 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 # 
 
-ACLOCAL_AMFLAGS = -I m4
+AM_CFLAGS = -pthread -std=gnu99 -Wall -Werror -I./featsel/
 
-SUBDIRS = libs/thread_queue libs/mbox libs/featsel src
+lib_LIBRARIES = libfeatsel.a
+include_HEADERS = featsel.h
+
+includemboxdir = $(prefix)/include/featsel
+includembox_HEADERS = featsel/feattuple.h featsel/types.h
+
+libfeatsel_a_SOURCES = $(include_HEADERS) \
+                       $(includembox_HEADERS) \
+                       commander.c feattuple.c headers/datatypes.h
