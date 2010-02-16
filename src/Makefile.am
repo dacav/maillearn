@@ -19,10 +19,13 @@
 
 AM_CFLAGS = -std=gnu99 -Wall -Werror -pthread \
             -I$(top_srcdir)/libs/mbox/ \
-            -I$(top_srcdir)/libs/thread_queue/
+            -I$(top_srcdir)/libs/thread_queue/ \
+            -I$(top_srcdir)/libs/featsel
 
-AM_LDFLAGS = -L$(top_srcdir)/libs/mbox/ -L$(top_srcdir)/libs/thread_queue/
-LDADD = -lmbox -lthrdqueue -ldacav
+AM_LDFLAGS = -L$(top_srcdir)/libs/mbox/ \
+             -L$(top_srcdir)/libs/thread_queue/ \
+             -L$(top_srcdir)/libs/featsel/
+LDADD = -lmbox -lthrdqueue -ldacav -lfeatsel
 
 bin_PROGRAMS = maillearn
 maillearn_SOURCES = main.c

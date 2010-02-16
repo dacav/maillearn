@@ -20,3 +20,4 @@
 
 #include <featsel/types.h>
 #include <featsel/feattuple.h>
+#include <featsel/commander.h>

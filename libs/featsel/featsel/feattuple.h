@@ -23,6 +23,8 @@
 
 feat_tuple_t *featsel_analyze (featsel_t *fs, void *elem);
 
-void featsel_freetuple (feat_tuple_t *t);
+void featsel_tuple_free (feat_tuple_t *t);
+
+double featsel_tuple_distance (feat_tuple_t *t0, feat_tuple_t *t1);
 
 #endif // __defined_featsel_feattuple_h

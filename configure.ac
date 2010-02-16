@@ -49,6 +49,7 @@ AC_CONFIG_FILES([Makefile
                  libs/mbox/Makefile
                  libs/thread_queue/Makefile
                  libs/featsel/Makefile
+                 libs/featsel/tests/Makefile
                  src/Makefile])
 
 AC_OUTPUT

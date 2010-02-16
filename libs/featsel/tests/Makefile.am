@@ -17,6 +17,14 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 # 
 
-ACLOCAL_AMFLAGS = -I m4
+AM_CFLAGS = -std=gnu99 -Wall -Werror -I./mbox/ \
+            -I$(top_srcdir)/libs/featsel/ -D_GNU_SOURCE
 
-SUBDIRS = libs/thread_queue libs/mbox libs/featsel libs/featsel/tests src
+AM_LDFLAGS = -L$(top_srcdir)/libs/featsel/
+
+check_PROGRAMS = test00
+TESTS = $(check_PROGRAMS)
+
+LDADD = -lfeatsel -ldacav -lm
+
+test00_SOURCES = test00.c

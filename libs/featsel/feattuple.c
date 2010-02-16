@@ -21,6 +21,9 @@
 #include <featsel.h>
 #include <dacav.h>
 #include <assert.h>
+
+#include <math.h>
+
 #include "headers/datatypes.h"
 
 static
@@ -56,7 +59,35 @@ feat_tuple_t *featsel_analyze (featsel_t *fs, void *elem)
     return tuple;
 }
 
-void featsel_freetuple (feat_tuple_t *t)
+void featsel_tuple_free (feat_tuple_t *t)
 {
     free(t);
 }
+
+static inline
+double square (double x)
+{
+    return x * x;
+}
+
+double distance (feat_tuple_t *max, feat_tuple_t *min)
+{
+    register unsigned i;
+    double ret = 0;
+
+    for (i = 0; i < min->size; i ++) {
+        ret += square(min->values[i] - max->values[i]);
+    }
+    while (i < max->size) {
+        ret += square(max->values[i]);
+    }
+    return sqrt(ret);
+}
+
+double featsel_tuple_distance (feat_tuple_t *t0, feat_tuple_t *t1)
+{
+    if (t0->size > t1->size)
+        return distance(t0, t1);
+    return distance(t1, t0);
+}
+
